@@ -1,10 +1,18 @@
 import { Interactions } from "./interactions";
+import { GlassPointer } from "./glass-pointer";
+import { WaitlistForm } from "./waitlist-form";
 
 // Pre-rebrand repo slug. GitHub 301s renamed repos permanently, so this keeps
 // working — swap it once the protocol repo is renamed.
 const GITHUB = "https://github.com/danielx2d4144/zenfinance_privacy";
-const WAITLIST =
-  "mailto:danielwork4144@gmail.com?subject=NoctFinance%20waitlist&body=Wallet%20or%20contact%20(optional)%3A%0AWhat%20I%27d%20use%20private%20lending%20for%3A";
+
+const NAV_LINKS = [
+  { href: "#proof", label: "Proof" },
+  { href: "#spec", label: "Protocol" },
+  { href: "#how", label: "How it works" },
+  { href: "#faq", label: "FAQ" },
+  { href: GITHUB, label: "GitHub", external: true },
+];
 
 const TICKER_ITEMS = [
   "shielded positions",
@@ -15,9 +23,51 @@ const TICKER_ITEMS = [
   "proofs over promises",
 ];
 
+const FAQ_ITEMS = [
+  {
+    q: "If positions are private, how do you stop bad debt?",
+    a: "Per-user amounts are hidden, but protocol-level totals stay public and every operation carries a zero-knowledge proof that health-factor and liquidity rules hold. The market is auditable; individuals are not.",
+  },
+  {
+    q: "Is this live? What exists today?",
+    a: "The full stack is built and test-covered: 11 contracts (224 passing tests, including solvency invariants), 11 zk circuits with pinned verification keys, in-browser proving, and signature-only recovery. A public testnet demo is the next milestone; mainnet follows a security audit — not before.",
+  },
+  {
+    q: "What about compliance?",
+    a: "Privacy is not anonymity from everyone, always. The design supports optional auditor-decryption at deposit time, so users who need a compliance trail can have one — chosen, not imposed.",
+  },
+  {
+    q: "Who can see my balance?",
+    a: "You. Your balance lives as encrypted notes only your keys can open. The protocol sees commitments; explorers see proofs; your counterparties see a solvent market.",
+  },
+];
+
+// One question = one frosted card.
+function FaqItem({ q, a }: { q: string; a: string }) {
+  return (
+    <details className="glass glass-react reveal">
+      <summary>
+        {q}
+        <span className="faq-x">+</span>
+      </summary>
+      <p>{a}</p>
+    </details>
+  );
+}
+
 export default function Home() {
   return (
     <>
+      {/* ambient wash — gives the glass blur something to bend */}
+      <div className="ambient" aria-hidden="true">
+        <span className="orb orb-a" />
+        <span className="orb orb-b" />
+        <span className="orb orb-c" />
+      </div>
+
+      {/* cursor spotlight — fixed, follows the pointer across the whole page */}
+      <div className="page-spot" id="spot" aria-hidden="true" />
+
       {/* ticker */}
       <div className="ticker" aria-hidden="true">
         <div className="ticker-track">
@@ -32,30 +82,51 @@ export default function Home() {
         </div>
       </div>
 
-      {/* nav */}
-      <header className="nav" id="nav">
-        <a className="wordmark" href="#top">
-          <span className="wordmark-tick" />
-          NoctFinance
-        </a>
-        <nav className="nav-links">
-          <a href="#proof">Proof</a>
-          <a href="#spec">Protocol</a>
-          <a href="#how">How it works</a>
-          <a href="#faq">FAQ</a>
-          <a className="nav-gh" href={GITHUB} target="_blank" rel="noopener noreferrer">
-            GitHub
+      {/* nav — floating glass pill, doma.xyz style */}
+      <div className="nav-wrap">
+        <header className="nav glass" id="nav">
+          <a className="wordmark" href="#top">
+            NoctFinance
           </a>
-        </nav>
-        <a className="btn btn-gradient btn-sm" href="#waitlist">
-          Join the waitlist
-        </a>
-      </header>
+          <nav className="nav-links">
+            {NAV_LINKS.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                className={l.external ? "nav-gh" : undefined}
+                {...(l.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              >
+                {l.label}
+              </a>
+            ))}
+          </nav>
+          <a className="btn btn-gradient btn-sm" href="#waitlist">
+            Join the waitlist
+          </a>
+          {/* Phone-width menu. A <details> so the links are reachable with no JS
+              at all; interactions.tsx only adds close-on-select and Escape. */}
+          <details className="nav-menu" id="navMenu">
+            <summary aria-label="Open menu">
+              <span className="burger" aria-hidden="true" />
+            </summary>
+            <nav className="nav-menu-panel glass">
+              {NAV_LINKS.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  {...(l.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                >
+                  {l.label}
+                </a>
+              ))}
+            </nav>
+          </details>
+        </header>
+      </div>
 
       <main id="top">
         {/* hero */}
         <section className="hero" id="hero">
-          <div className="hero-spot" id="spot" aria-hidden="true" />
           <p className="kicker reveal">
             {"// SIGNAL / NOISE"}&nbsp;&nbsp;·&nbsp;&nbsp;PRIVACY-PRESERVING MONEY MARKET
           </p>
@@ -78,7 +149,7 @@ export default function Home() {
               Join the waitlist
             </a>
             <a className="btn btn-outline" href={GITHUB} target="_blank" rel="noopener noreferrer">
-              Read the docs
+              Read the source
             </a>
           </div>
 
@@ -126,7 +197,7 @@ export default function Home() {
                 your secrets never touch our servers, because there are none.
               </p>
             </div>
-            <div className="terminal reveal" id="terminal">
+            <div className="terminal glass reveal" id="terminal">
               <div className="term-bar">
                 <span className="dots">
                   <i />
@@ -178,7 +249,7 @@ export default function Home() {
             Verifiable by anyone.
           </h2>
           <div className="grid3">
-            <article className="card reveal">
+            <article className="card glass glass-react reveal">
               <span className="idx">01/</span>
               <span className="grad-tick" />
               <h3>Shielded positions</h3>
@@ -201,7 +272,7 @@ export default function Home() {
                 </div>
               </dl>
             </article>
-            <article className="card reveal">
+            <article className="card glass glass-react reveal">
               <span className="idx">02/</span>
               <span className="grad-tick" />
               <h3>ZK-verified solvency</h3>
@@ -224,7 +295,7 @@ export default function Home() {
                 </div>
               </dl>
             </article>
-            <article className="card reveal">
+            <article className="card glass glass-react reveal">
               <span className="idx">03/</span>
               <span className="grad-tick" />
               <h3>Agent-native ERC-4337</h3>
@@ -255,7 +326,7 @@ export default function Home() {
           <p className="kicker reveal">{"// HOW IT WORKS"}</p>
           <h2 className="reveal">Three steps. One signature.</h2>
           <div className="steps">
-            <div className="step reveal">
+            <div className="step glass glass-react reveal">
               <span className="step-n">1</span>
               <h3>Sign once</h3>
               <p>
@@ -266,7 +337,7 @@ export default function Home() {
             <div className="step-arrow reveal" aria-hidden="true">
               →
             </div>
-            <div className="step reveal">
+            <div className="step glass glass-react reveal">
               <span className="step-n">2</span>
               <h3>Prove in your browser</h3>
               <p>
@@ -277,7 +348,7 @@ export default function Home() {
             <div className="step-arrow reveal" aria-hidden="true">
               →
             </div>
-            <div className="step reveal">
+            <div className="step glass glass-react reveal">
               <span className="step-n">3</span>
               <h3>The chain verifies</h3>
               <p>
@@ -292,74 +363,32 @@ export default function Home() {
         <section className="section" id="faq">
           <p className="kicker reveal">{"// FAQ"}</p>
           <h2 className="reveal">Fair questions.</h2>
-          <div className="faqs reveal">
-            <details>
-              <summary>
-                If positions are private, how do you stop bad debt?
-                <span className="faq-x">+</span>
-              </summary>
-              <p>
-                Per-user amounts are hidden, but protocol-level totals stay public and
-                every operation carries a zero-knowledge proof that health-factor and
-                liquidity rules hold. The market is auditable; individuals are not.
-              </p>
-            </details>
-            <details>
-              <summary>
-                Is this live? What exists today?
-                <span className="faq-x">+</span>
-              </summary>
-              <p>
-                The full stack is built and test-covered: 11 contracts (224 passing tests,
-                including solvency invariants), 11 zk circuits with pinned verification
-                keys, in-browser proving, and signature-only recovery. A public testnet
-                demo is the next milestone; mainnet follows a security audit — not before.
-              </p>
-            </details>
-            <details>
-              <summary>
-                What about compliance?
-                <span className="faq-x">+</span>
-              </summary>
-              <p>
-                Privacy is not anonymity from everyone, always. The design supports
-                optional auditor-decryption at deposit time, so users who need a
-                compliance trail can have one — chosen, not imposed.
-              </p>
-            </details>
-            <details>
-              <summary>
-                Who can see my balance?
-                <span className="faq-x">+</span>
-              </summary>
-              <p>
-                You. Your balance lives as encrypted notes only your keys can open. The
-                protocol sees commitments; explorers see proofs; your counterparties see a
-                solvent market.
-              </p>
-            </details>
+          <div className="faqs">
+            {FAQ_ITEMS.map((item) => (
+              <FaqItem key={item.q} q={item.q} a={item.a} />
+            ))}
           </div>
         </section>
 
         {/* waitlist */}
         <section className="section closing" id="waitlist">
-          <p className="kicker reveal">{"// EARLY ACCESS"}</p>
-          <h2 className="reveal">The quiet money market.</h2>
-          <p className="status-line reveal">
-            open source · 224/224 tests green · audits being scoped · testnet demo next
-          </p>
-          <div className="cta-row center reveal">
-            <a className="btn btn-gradient" href={WAITLIST}>
-              Join the waitlist
-            </a>
-            <a className="btn btn-outline" href={GITHUB} target="_blank" rel="noopener noreferrer">
-              Star the repo
-            </a>
+          <div className="closing-panel glass glass-react reveal">
+            <p className="kicker">{"// EARLY ACCESS"}</p>
+            <h2>The quiet money market.</h2>
+            <p className="status-line">
+              open source · 224/224 tests green · audits being scoped · testnet demo next
+            </p>
+            <WaitlistForm />
+            <div className="cta-row center">
+              <a className="btn btn-outline" href={GITHUB} target="_blank" rel="noopener noreferrer">
+                Star the repo
+              </a>
+            </div>
+            <p className="tiny">
+              One email, once — when testnet goes live. No trackers, no sharing,
+              unsubscribe in a click.
+            </p>
           </div>
-          <p className="tiny reveal">
-            No forms, no trackers. The waitlist is an email — fitting, for a privacy
-            protocol.
-          </p>
         </section>
       </main>
 
@@ -376,6 +405,7 @@ export default function Home() {
       </footer>
 
       <Interactions />
+      <GlassPointer />
     </>
   );
 }

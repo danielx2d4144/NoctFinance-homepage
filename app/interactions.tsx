@@ -19,17 +19,39 @@ export function Interactions() {
     onScroll();
     cleanups.push(() => window.removeEventListener("scroll", onScroll));
 
-    /* cursor spotlight over hero */
-    const hero = document.getElementById("hero");
+    /* cursor spotlight — viewport-wide, follows the pointer over every section */
     const spot = document.getElementById("spot");
-    if (hero && spot && !reduced) {
+    if (spot && !reduced) {
       const onMove = (e: PointerEvent) => {
-        const r = hero.getBoundingClientRect();
-        spot.style.setProperty("--mx", (((e.clientX - r.left) / r.width) * 100).toFixed(1) + "%");
-        spot.style.setProperty("--my", (((e.clientY - r.top) / r.height) * 100).toFixed(1) + "%");
+        spot.style.setProperty("--mx", ((e.clientX / window.innerWidth) * 100).toFixed(1) + "%");
+        spot.style.setProperty("--my", ((e.clientY / window.innerHeight) * 100).toFixed(1) + "%");
       };
-      hero.addEventListener("pointermove", onMove);
-      cleanups.push(() => hero.removeEventListener("pointermove", onMove));
+      window.addEventListener("pointermove", onMove, { passive: true });
+      cleanups.push(() => window.removeEventListener("pointermove", onMove));
+    }
+
+    /* phone menu — the <details> opens on its own; this only closes it again
+       after a selection, on Escape, or on a tap outside */
+    const menu = document.getElementById("navMenu") as HTMLDetailsElement | null;
+    if (menu) {
+      const close = () => menu.removeAttribute("open");
+      const onMenuClick = (e: Event) => {
+        if ((e.target as HTMLElement).closest("a")) close();
+      };
+      const onDocPointer = (e: Event) => {
+        if (menu.open && !menu.contains(e.target as Node)) close();
+      };
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === "Escape") close();
+      };
+      menu.addEventListener("click", onMenuClick);
+      document.addEventListener("pointerdown", onDocPointer);
+      document.addEventListener("keydown", onKey);
+      cleanups.push(() => {
+        menu.removeEventListener("click", onMenuClick);
+        document.removeEventListener("pointerdown", onDocPointer);
+        document.removeEventListener("keydown", onKey);
+      });
     }
 
     /* scroll reveals (staggered) */
@@ -91,10 +113,16 @@ export function Interactions() {
     const dec = document.getElementById("decrypt");
     const underline = document.getElementById("underline");
     if (dec && underline) {
-      if (reduced) {
+      // The wrap carries the class too: on phones the phrase wraps, so the rule
+      // is drawn as a per-line background on the text rather than the bar.
+      const revealUnderline = () => {
         underline.classList.add("on");
+        underline.parentElement?.classList.add("on");
+      };
+      if (reduced) {
+        revealUnderline();
       } else {
-        const t = setTimeout(() => decrypt(dec, () => underline.classList.add("on")), 350);
+        const t = setTimeout(() => decrypt(dec, revealUnderline), 350);
         cleanups.push(() => clearTimeout(t));
       }
     }
