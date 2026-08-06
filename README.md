@@ -1,7 +1,8 @@
-# zenfinance — homepage
+# NoctFinance — homepage
 
-The public homepage for [zenfinance](https://github.com/danielx2d4144/zenfinance_privacy),
-a privacy-preserving lending protocol.
+The public homepage for NoctFinance, a privacy-preserving lending protocol.
+The protocol itself lives in a [separate repo](https://github.com/danielx2d4144/zenfinance_privacy)
+— still under its pre-rebrand slug; GitHub will redirect it once renamed.
 
 - **Stack:** Next.js (App Router, SSR) + hand-rolled CSS/JS — zero runtime dependencies
   beyond React. Fully server-rendered for SEO; all animation is a client-side
@@ -16,3 +17,23 @@ a privacy-preserving lending protocol.
 npm install
 npm run dev   # http://localhost:3000
 ```
+
+## Canonical domain
+
+`app/site.ts` holds the one origin every SEO surface derives from — the canonical
+tag, `sitemap.xml`, the `robots.txt` host, and the JSON-LD `@id`s. Change it there
+and nowhere else. It must match the host Vercel serves **without** redirecting.
+
+## Search-engine verification
+
+Optional; each tag is omitted entirely when its variable is unset. Set these in
+Vercel → Settings → Environment Variables, then redeploy:
+
+| Variable | Source |
+| --- | --- |
+| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | Google Search Console → HTML tag method |
+| `NEXT_PUBLIC_BING_SITE_VERIFICATION` | Bing Webmaster Tools → meta tag method |
+| `NEXT_PUBLIC_YANDEX_VERIFICATION` | Yandex Webmaster → meta tag method |
+
+A Search Console **Domain property** (DNS TXT) is preferable to the meta tag —
+it covers every subdomain and both protocols at once.

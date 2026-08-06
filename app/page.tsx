@@ -1,8 +1,10 @@
 import { Interactions } from "./interactions";
 
+// Pre-rebrand repo slug. GitHub 301s renamed repos permanently, so this keeps
+// working — swap it once the protocol repo is renamed.
 const GITHUB = "https://github.com/danielx2d4144/zenfinance_privacy";
 const WAITLIST =
-  "mailto:danielwork4144@gmail.com?subject=zenfinance%20waitlist&body=Wallet%20or%20contact%20(optional)%3A%0AWhat%20I%27d%20use%20private%20lending%20for%3A";
+  "mailto:danielwork4144@gmail.com?subject=NoctFinance%20waitlist&body=Wallet%20or%20contact%20(optional)%3A%0AWhat%20I%27d%20use%20private%20lending%20for%3A";
 
 const TICKER_ITEMS = [
   "shielded positions",
@@ -34,7 +36,7 @@ export default function Home() {
       <header className="nav" id="nav">
         <a className="wordmark" href="#top">
           <span className="wordmark-tick" />
-          zenfinance
+          NoctFinance
         </a>
         <nav className="nav-links">
           <a href="#proof">Proof</a>
@@ -131,7 +133,7 @@ export default function Home() {
                   <i />
                   <i />
                 </span>
-                <span className="term-title">zenfinance — ci · main</span>
+                <span className="term-title">noctfinance — ci · main</span>
               </div>
               <div className="term-body">
                 {/* Server-rendered content so crawlers and no-JS visitors see it;
@@ -362,7 +364,7 @@ export default function Home() {
       </main>
 
       <footer className="footer">
-        <span>zenfinance © 2026</span>
+        <span>NoctFinance © 2026</span>
         <nav>
           <a href="#proof">proof</a>
           <a href="#spec">protocol</a>
