@@ -8,6 +8,8 @@
  * a generic 504 instead of a sentence we wrote. Hence the explicit timeout.
  */
 
+import { CONTACT_EMAIL, SITE_URL, SOCIAL } from "./site";
+
 /** Comfortably above Resend's normal latency, well under any platform limit. */
 const TIMEOUT_MS = 8000;
 
@@ -101,40 +103,86 @@ export async function sendConfirmationEmail(
   return post("/emails", {
     from,
     to: email,
-    subject: "Confirm your NoctFinance waitlist signup",
+    // Replies land with a human rather than bouncing off a no-reply void. The
+    // address is a real forwarder; see README.
+    reply_to: CONTACT_EMAIL,
+    subject: "Confirm your spot on the NoctFinance waitlist",
     // Both parts, always. A text/plain alternative is what stops this landing
     // in spam, and it is the only version some clients will ever render.
     text: [
-      "Someone — hopefully you — asked to join the NoctFinance waitlist with this address.",
+      "Welcome to NoctFinance.",
+      "",
+      "You're one click from the waitlist. Confirm your address and we'll write",
+      "to you when the testnet demo opens — not before, and not about anything else.",
       "",
       "Confirm here:",
       confirmUrl,
       "",
-      "The link is good for 24 hours. If this wasn't you, ignore this email;",
-      "nothing happens and your address is not stored.",
+      "The link works for 24 hours. If you didn't sign up, ignore this email —",
+      "nothing happens and your address is never stored.",
+      "",
+      `X:       ${SOCIAL.x}`,
+      `Discord: ${SOCIAL.discord}`,
+      `Email:   ${CONTACT_EMAIL}`,
+      "",
+      "NoctFinance — lend and borrow on-chain without broadcasting your balance sheet.",
     ].join("\n"),
+    // Deliberately plain HTML: inline styles, no external CSS, no gradients on
+    // anything load-bearing. Mail clients strip <style> blocks, and Outlook's
+    // Word engine ignores gradients and padded anchors entirely — hence the
+    // table-wrapped button, which is the one construct every client renders.
     html: `
-<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#0b0b0d;color:#e8e8ea;padding:40px 24px">
+<div style="background:#0b0b0d;padding:40px 24px;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e8e8ea">
+  <span style="display:none;font-size:1px;color:#0b0b0d;max-height:0;overflow:hidden">
+    One click to confirm, then we&rsquo;ll only write when the testnet demo opens.
+  </span>
   <div style="max-width:520px;margin:0 auto">
-    <p style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7d7d87;margin:0 0 24px">
-      NoctFinance
+
+    <img src="${SITE_URL}/noctfinance-wordmark.png" alt="NoctFinance"
+         width="152" height="28"
+         style="display:block;width:152px;height:28px;border:0;outline:none;text-decoration:none" />
+    <div style="width:44px;height:2px;background:#22d3ee;margin:16px 0 26px"></div>
+
+    <p style="font-size:19px;line-height:1.45;font-weight:600;margin:0 0 14px;color:#f4f4f6">
+      Welcome to NoctFinance.
     </p>
-    <p style="font-size:15px;line-height:1.6;margin:0 0 24px">
-      Someone &mdash; hopefully you &mdash; asked to join the waitlist with this address.
-      Confirm it and you&rsquo;re on the list.
+    <p style="font-size:15px;line-height:1.65;margin:0 0 26px;color:#c9c9d1">
+      You&rsquo;re one click from the waitlist. Confirm your address and we&rsquo;ll write
+      to you when the testnet demo opens &mdash; not before, and not about anything else.
     </p>
-    <p style="margin:0 0 28px">
-      <a href="${confirmUrl}"
-         style="display:inline-block;background:linear-gradient(90deg,#22d3ee,#a3e635);color:#0b0b0d;
-                font-weight:600;text-decoration:none;padding:13px 22px;border-radius:10px">
-        Confirm my email
-      </a>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 26px">
+      <tr>
+        <td style="background:#0e7490;border-radius:10px">
+          <a href="${confirmUrl}"
+             style="display:inline-block;padding:14px 26px;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+                    font-size:15px;font-weight:600;color:#ffffff;text-decoration:none">
+            Confirm my email
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="font-size:13px;line-height:1.65;color:#8f8f9a;margin:0">
+      The link works for 24 hours. If you didn&rsquo;t sign up, ignore this email
+      &mdash; nothing happens and your address is never stored.
     </p>
-    <p style="font-size:13px;line-height:1.6;color:#9a9aa4;margin:0 0 8px">
-      The link is good for 24 hours. If this wasn&rsquo;t you, ignore this email
-      &mdash; nothing happens and your address is not stored.
-    </p>
-    <p style="font-size:12px;color:#6b6b75;word-break:break-all;margin:24px 0 0">${confirmUrl}</p>
+    <p style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.5;
+              color:#6b6b75;word-break:break-all;margin:18px 0 0">${confirmUrl}</p>
+
+    <div style="border-top:1px solid #23232a;margin:32px 0 0;padding:22px 0 0">
+      <p style="font-size:13px;line-height:1.6;margin:0 0 12px">
+        <a href="${SOCIAL.x}" style="color:#22d3ee;text-decoration:none">X</a>
+        <span style="color:#3a3a44">&nbsp;&middot;&nbsp;</span>
+        <a href="${SOCIAL.discord}" style="color:#22d3ee;text-decoration:none">Discord</a>
+        <span style="color:#3a3a44">&nbsp;&middot;&nbsp;</span>
+        <a href="mailto:${CONTACT_EMAIL}" style="color:#22d3ee;text-decoration:none">${CONTACT_EMAIL}</a>
+      </p>
+      <p style="font-size:12px;line-height:1.6;color:#6b6b75;margin:0">
+        Lend and borrow on-chain &mdash; without broadcasting your balance sheet.
+      </p>
+    </div>
+
   </div>
 </div>`.trim(),
   });
