@@ -4,12 +4,12 @@
  * Canonical URL, sitemap entries, robots host and the JSON-LD @ids all derive
  * from this, so they cannot drift apart and show crawlers duplicate content.
  *
- * NOTE: this must match the exact host Vercel serves without redirecting. If
- * you configure the domain so the apex 308s to www, change this to the www
- * form. Do not redeploy until the domain resolves — a canonical pointing at a
- * host that does not exist is worse than no canonical at all.
+ * This must match the exact host Vercel serves without redirecting. It is the
+ * www form because the apex 308s here — pointing the canonical at the apex made
+ * every crawler follow a redirect to find the page it had just been told was
+ * canonical. If you ever make the apex primary in Vercel, change this back.
  */
-export const SITE_URL = "https://noctfinance.xyz";
+export const SITE_URL = "https://www.noctfinance.xyz";
 
 export const SITE_NAME = "NoctFinance";
 
