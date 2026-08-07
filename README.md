@@ -72,6 +72,13 @@ means nobody can sign someone else up, and the form's response is identical
 whether or not an address is already subscribed — so it can't be used to test
 who has signed up.
 
+Step 1 also asks Resend whether the address is already a live contact, and if it
+is, skips the send while returning that same message. The **response** stays
+identical — that's the enumeration defence above — but the **behaviour** differs,
+which is what stops the form mailing someone who never asked for a second copy.
+An address that signed up and never clicked still gets a fresh link; the lookup
+fails open, so if Resend is slow or down the email goes out as before.
+
 ### Environment variables
 
 | Variable | Required | Source |

@@ -21,7 +21,7 @@
 import { headers } from "next/headers";
 import { SITE_URL } from "./site";
 import { withinLimit } from "./waitlist-rate-limit";
-import { sendConfirmationEmail } from "./waitlist-resend";
+import { lookupContact, sendConfirmationEmail } from "./waitlist-resend";
 import { mintConfirmToken } from "./waitlist-token";
 import { EMAIL_MAX, EMAIL_RE, type WaitlistState } from "./waitlist-state";
 
@@ -112,6 +112,23 @@ export async function joinWaitlist(
   // Misconfiguration is ours, not the visitor's. The helpers log the specifics;
   // nobody who just wanted to leave their email should read a stack trace.
   if (!token) return unavailable;
+
+  // Already subscribed? Say nothing different, do nothing further.
+  //
+  // The message below is the same one a brand-new address gets, because a form
+  // that answers "you're already on the list" is an oracle: type any address,
+  // learn whether that person signed up for a private lending protocol. But
+  // sending the email anyway was its own problem — mail the recipient never
+  // asked for, and a way to aim ~432 messages a day at someone else's inbox
+  // within the rate limits. Diverging on behaviour while holding the response
+  // identical is what closes that without opening the other.
+  //
+  // Only a confirmed subscriber is skipped. An address that signed up but never
+  // clicked still gets a fresh link — losing the first email to a spam folder is
+  // the single most likely reason someone fills the form in twice.
+  if ((await lookupContact(email)) === "on-list") {
+    return { status: "ok", message: CHECK_INBOX };
+  }
 
   const url = `${confirmOrigin()}/waitlist/confirm?token=${encodeURIComponent(token)}`;
   const sent = await sendConfirmationEmail(email, url);

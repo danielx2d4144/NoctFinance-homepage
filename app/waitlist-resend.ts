@@ -68,6 +68,49 @@ async function post(path: string, body: unknown): Promise<ResendResult> {
 }
 
 /**
+ * Whether an address is already a live subscriber.
+ *
+ * "unknown" is not a failure to handle — it is the answer whenever the lookup
+ * did not return a clean yes or no, and callers must treat it as "go ahead".
+ * Blocking a first-time signup because Resend was briefly slow would trade a
+ * duplicate email for a lost one.
+ */
+export type ContactLookup = "on-list" | "not-on-list" | "unknown";
+
+/**
+ * Looks the address up so the signup action can decline to send a second
+ * confirmation to someone already subscribed.
+ *
+ * Deliberately does NOT distinguish unsubscribed contacts from absent ones:
+ * someone who opted out and then filled the form in again is asking to come
+ * back, and should get the confirmation like anyone else.
+ */
+export async function lookupContact(email: string): Promise<ContactLookup> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return "unknown";
+
+  try {
+    const res = await fetch(`${API}/contacts/${encodeURIComponent(email)}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      cache: "no-store",
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+
+    if (res.status === 404) return "not-on-list";
+    if (!res.ok) {
+      console.error(`[waitlist] contact lookup responded ${res.status}`);
+      return "unknown";
+    }
+
+    const body = (await res.json()) as { unsubscribed?: boolean };
+    return body.unsubscribed === false ? "on-list" : "not-on-list";
+  } catch (err) {
+    console.error("[waitlist] contact lookup failed:", err);
+    return "unknown";
+  }
+}
+
+/**
  * Adds the contact. Called only from the confirmation route, never from the
  * signup form — the whole point of double opt-in is that an unproven address
  * never reaches the list.
