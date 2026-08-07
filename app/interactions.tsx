@@ -54,6 +54,21 @@ export function Interactions() {
       });
     }
 
+    /* social dock — retire it once the footer is on screen. The footer carries
+       the same two links, so leaving the fixed cluster up means it sits on top
+       of its own duplicate and clips the signature line. Enhancement only: with
+       no JS the dock simply stays, and the scripting:none rule reserves room. */
+    const dock = document.querySelector(".social-dock");
+    const footer = document.querySelector(".footer-wrap");
+    if (dock && footer) {
+      const dockIo = new IntersectionObserver(
+        ([en]) => dock.classList.toggle("dock-hidden", en.isIntersecting),
+        { threshold: 0 },
+      );
+      dockIo.observe(footer);
+      cleanups.push(() => dockIo.disconnect());
+    }
+
     /* scroll reveals (staggered) */
     const io = new IntersectionObserver(
       (entries) => {

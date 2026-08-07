@@ -177,6 +177,11 @@ body {
   color: var(--txt); text-decoration: none; letter-spacing: -0.02em;
   display: inline-flex; align-items: center;
 }
+/* Height-driven, because the source PNG is 434x80 and only its height is a
+   meaningful design decision — width follows. 22px lands the letterforms at
+   roughly the cap height of the 17px text this replaced, so the nav's optical
+   balance is unchanged. */
+.wordmark-img { display: block; height: 22px; width: auto; }
 .nav-links { display: flex; gap: 26px; font-family: var(--mono); font-size: 12.5px; }
 .nav-links a { color: var(--txt-2); text-decoration: none; transition: color 0.2s; }
 .nav-links a:hover { color: var(--txt); }
@@ -392,6 +397,16 @@ h2 { font-size: clamp(28px, 3.6vw, 44px); font-weight: 700; letter-spacing: -0.0
 .tiny { font-family: var(--mono); font-size: 11px; color: var(--txt-3); margin-top: 22px; }
 
 /* footer */
+.footer-wrap { border-top: 1px solid var(--line); }
+.footer-contact {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 30px clamp(20px, 6vw, 88px) 26px;
+  font-family: var(--mono); font-size: 12px;
+}
+.footer-label { color: var(--txt-3); letter-spacing: 0.08em; }
+.footer-mail { color: var(--txt-2); text-decoration: none; transition: color 0.2s; }
+.footer-mail:hover { color: var(--txt); }
+
 .footer {
   display: flex; justify-content: space-between; align-items: center; gap: 16px;
   border-top: 1px solid var(--line); padding: 26px clamp(20px, 6vw, 88px);
@@ -400,6 +415,56 @@ h2 { font-size: clamp(28px, 3.6vw, 44px); font-weight: 700; letter-spacing: -0.0
 .footer nav { display: flex; gap: 20px; }
 .footer a { color: var(--txt-2); text-decoration: none; }
 .footer a:hover { color: var(--txt); }
+.foot-sig { color: var(--txt-3); letter-spacing: 0.06em; }
+
+/* ---------- social ----------
+   Two surfaces, one set of links. In the footer each button is its own glass
+   chip; in the dock the container is the glass and the buttons are bare, since
+   a backdrop-filter nested inside another backdrop root has nothing to sample
+   (the same trap .nav-menu-panel works around). */
+.social-row { display: flex; gap: 10px; margin-left: auto; }
+.social-btn {
+  width: 40px; height: 40px; border-radius: 12px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--txt-2);
+  transition: color 0.18s ease, transform 0.18s ease;
+}
+.social-btn svg { width: 17px; height: 17px; }
+.social-btn:hover { color: var(--txt); transform: translateY(-2px); }
+
+.social-dock {
+  /* Below the nav (50) and its dropdown (60) on purpose — an open mobile menu
+     reaches down the right-hand side and must win the corner. */
+  position: fixed; z-index: 45;
+  right: clamp(16px, 3vw, 28px); bottom: clamp(16px, 3vw, 28px);
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 6px; border-radius: 18px;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+/* Set by interactions.tsx while the footer is in view. */
+.social-dock.dock-hidden {
+  opacity: 0; transform: translateY(10px) scale(0.96); pointer-events: none;
+}
+.dock-btn {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--txt-2); background: transparent;
+  transition: color 0.18s ease, background 0.18s ease;
+}
+.dock-btn svg { width: 18px; height: 18px; }
+.dock-btn:hover { color: var(--txt); background: rgba(255, 255, 255, 0.06); }
+
+/* An outline, not the cyan box-shadow ring used on .waitlist-input: these sit
+   on .glass, and the forced-colors block below zeroes box-shadow on .glass —
+   which would erase the focus state exactly where it matters most. Icon-only
+   links have no text to fall back on, so this has to survive. */
+.social-btn:focus-visible,
+.dock-btn:focus-visible,
+.footer-mail:focus-visible,
+.wordmark:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
 
 /* ---------- reveal animation ---------- */
 .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
@@ -408,6 +473,8 @@ h2 { font-size: clamp(28px, 3.6vw, 44px); font-weight: 700; letter-spacing: -0.0
 @media (scripting: none) {
   .reveal { opacity: 1; transform: none; }
   .grad-underline { width: 100%; }
+  /* Nothing can retire the dock without JS, so reserve the corner instead. */
+  .footer { padding-bottom: 132px; }
 }
 
 /* ---------- responsive ---------- */
@@ -449,10 +516,24 @@ h2 { font-size: clamp(28px, 3.6vw, 44px); font-weight: 700; letter-spacing: -0.0
 
   /* Touch targets: 44px minimum. */
   .wordmark { min-height: 44px; }
-  .btn-sm { padding: 13px 18px; }
-  .footer { gap: 4px; padding: 18px clamp(20px, 6vw, 88px); }
+  .wordmark-img { height: 19px; }
+  /* The nav CTA measured 158px inside a 366px pill — 43% of the bar, crowding
+     the wordmark and the burger. Dropping the article and tightening the sides
+     takes it to ~122px. Vertical padding is untouched on purpose: the height is
+     the 44px touch target, not decoration. */
+  .btn-sm { padding: 13px 14px; }
+  .cta-the { display: none; }
   .footer nav { gap: 8px; }
   .footer a { padding: 13px 6px; }
+
+  .footer-contact { padding: 22px clamp(20px, 6vw, 88px) 18px; gap: 12px; }
+  /* Full-width so the icons keep their own line rather than being shoved right
+     against the wrapped email address. */
+  .social-row { margin-left: 0; width: 100%; }
+
+  .footer { gap: 4px; padding: 18px clamp(20px, 6vw, 88px); }
+  .social-dock { right: 12px; bottom: 12px; gap: 2px; padding: 4px; }
+  .dock-btn { width: 40px; height: 40px; }
 
   /* Fewer blur pixels per frame — a phone GPU composites this on every scroll
      tick, and there is far less behind the panels at this width anyway. */
@@ -470,6 +551,9 @@ h2 { font-size: clamp(28px, 3.6vw, 44px); font-weight: 700; letter-spacing: -0.0
   .grad-underline::after { animation: none; }
   .orb { animation: none; }
   .step-n { animation: none; }
+  .social-btn, .dock-btn, .social-dock { transition: none; }
+  .social-btn:hover { transform: none; }
+  .social-dock.dock-hidden { transform: none; }
   html { scroll-behavior: auto; }
 }
 

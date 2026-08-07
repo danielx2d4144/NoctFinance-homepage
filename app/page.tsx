@@ -1,10 +1,12 @@
 import { Interactions } from "./interactions";
 import { GlassPointer } from "./glass-pointer";
 import { WaitlistForm } from "./waitlist-form";
+import { BrandWordmark } from "./brand-wordmark";
+import { SocialLinks } from "./social-links";
+import { SocialDock } from "./social-dock";
+import { CONTACT_EMAIL, SOCIAL } from "./site";
 
-// Pre-rebrand repo slug. GitHub 301s renamed repos permanently, so this keeps
-// working — swap it once the protocol repo is renamed.
-const GITHUB = "https://github.com/danielx2d4144/zenfinance_privacy";
+const GITHUB = SOCIAL.github;
 
 const NAV_LINKS = [
   { href: "#proof", label: "Proof" },
@@ -85,8 +87,8 @@ export default function Home() {
       {/* nav — floating glass pill, doma.xyz style */}
       <div className="nav-wrap">
         <header className="nav glass" id="nav">
-          <a className="wordmark" href="#top">
-            NoctFinance
+          <a className="wordmark" href="#top" aria-label="NoctFinance — home">
+            <BrandWordmark />
           </a>
           <nav className="nav-links">
             {NAV_LINKS.map((l) => (
@@ -100,8 +102,10 @@ export default function Home() {
               </a>
             ))}
           </nav>
+          {/* The article is dropped at phone width — see .cta-the. Kept in the
+              markup rather than swapped at runtime so SSR ships one string. */}
           <a className="btn btn-gradient btn-sm" href="#waitlist">
-            Join the waitlist
+            Join<span className="cta-the">{" the"}</span> waitlist
           </a>
           {/* Phone-width menu. A <details> so the links are reachable with no JS
               at all; interactions.tsx only adds close-on-select and Escape. */}
@@ -385,25 +389,40 @@ export default function Home() {
               </a>
             </div>
             <p className="tiny">
-              One email, once — when testnet goes live. No trackers, no sharing,
-              unsubscribe in a click.
+              We send one confirmation link first — nothing is stored until you
+              click it. Then one email, once, when testnet goes live. No
+              trackers, no sharing, unsubscribe in a click.
             </p>
           </div>
         </section>
       </main>
 
-      <footer className="footer">
-        <span>NoctFinance © 2026</span>
-        <nav>
-          <a href="#proof">proof</a>
-          <a href="#spec">protocol</a>
-          <a href={GITHUB} target="_blank" rel="noopener noreferrer">
-            github
+      {/* Two tiers: contact channels, then the existing legal/nav strip. The
+          email and the two icons would make four items in the old one-line
+          space-between row, which crowds badly before it wraps. */}
+      <div className="footer-wrap">
+        <div className="footer-contact">
+          <span className="footer-label">get in touch</span>
+          <a className="footer-mail" href={`mailto:${CONTACT_EMAIL}`}>
+            {CONTACT_EMAIL}
           </a>
-        </nav>
-        <span className="foot-sig">signal / noise — proofs over promises</span>
-      </footer>
+          <SocialLinks />
+        </div>
 
+        <footer className="footer">
+          <span>NoctFinance © 2026</span>
+          <nav>
+            <a href="#proof">proof</a>
+            <a href="#spec">protocol</a>
+            <a href={GITHUB} target="_blank" rel="noopener noreferrer">
+              github
+            </a>
+          </nav>
+          <span className="foot-sig">signal / noise — proofs over promises</span>
+        </footer>
+      </div>
+
+      <SocialDock />
       <Interactions />
       <GlassPointer />
     </>
