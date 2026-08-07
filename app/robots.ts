@@ -12,6 +12,9 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
+        // Confirmation links carry a signed token in the query string. The page
+        // is noindex anyway; this keeps crawlers from requesting it at all.
+        disallow: "/waitlist/",
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,

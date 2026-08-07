@@ -19,3 +19,16 @@ export type WaitlistState = {
 };
 
 export const WAITLIST_INITIAL: WaitlistState = { status: "idle", message: "" };
+
+/**
+ * Deliberately permissive. Strict RFC 5322 patterns reject addresses that work
+ * fine, and the only authority on whether an address exists is whether mail to
+ * it arrives — which the confirmation step now actually establishes. This
+ * rejects the obvious typos and nothing else.
+ *
+ * Lives here rather than in waitlist-action.ts because a "use server" module
+ * may only export async functions.
+ */
+export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+export const EMAIL_MAX = 254;
