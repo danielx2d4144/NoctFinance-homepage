@@ -702,7 +702,7 @@ button.btn:disabled { opacity: 0.6; cursor: progress; transform: none; box-shado
 .cookie-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
 @media (max-width: 480px) {
-  .cookie-banner { bottom: 16px; padding: 20px; }
+  .cookie-banner { bottom: 16px; right: 16px; left: 16px; width: auto; max-width: none; padding: 20px; }
   .cookie-actions { flex-direction: column; }
   .cookie-actions .btn { width: 100%; text-align: center; }
 }
