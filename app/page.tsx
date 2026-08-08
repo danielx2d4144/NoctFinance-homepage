@@ -417,6 +417,7 @@ export default function Home() {
             <a href={GITHUB} target="_blank" rel="noopener noreferrer">
               github
             </a>
+            <a href="/cookies">cookies</a>
           </nav>
           <span className="foot-sig">signal / noise — proofs over promises</span>
         </footer>

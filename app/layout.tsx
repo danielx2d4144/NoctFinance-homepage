@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE_NAME, SITE_URL, SOCIAL, X_HANDLE } from "./site";
+import { CookieBanner } from "./cookie-banner";
 
 const sans = Space_Grotesk({
   subsets: ["latin"],
@@ -127,6 +128,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         {children}
+        <CookieBanner />
       </body>
     </html>
   );
